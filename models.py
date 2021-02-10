@@ -94,9 +94,9 @@ class Movie(db.Model):
     def format(self):
         return {
           'id': self.id,
-          'question': self.title,
-          'answer': self.release_date,
-          'category': self.boxoffice,
+          'title': self.title,
+          'release_date': self.release_date,
+          'boxoffice': self.boxoffice,
         }
 
 
@@ -116,9 +116,9 @@ class Actor(db.Model):
     assign_actor = db.relationship('Assign', back_populates="actor")
 
     def __init__(self, name, age, gender):
-        self.type = name
-        self.type = age
-        self.type = gender
+        self.name = name
+        self.age = age
+        self.gender = gender
 
     def insert(self):
         db.session.add(self)

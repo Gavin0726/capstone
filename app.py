@@ -2,17 +2,329 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from sqlalchemy import exc
+import json
+from models import setup_db, Assign, Movie, Actor
+# from .auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
+    setup_db(app)
     CORS(app)
 
     return app
 
 
-APP = create_app()
+app = create_app()
+
+'''
+GET /movies
+'''
+
+
+@app.route('/movies')
+def retrieve_movies():
+
+    selection = Movie.query.order_by(Movie.id).all()
+
+    movies = [movie.format() for movie in selection]
+
+    return jsonify({
+        'success': True,
+        'movies': movies,
+    })
+
+
+'''
+POST /movies
+'''
+
+
+@app.route('/movies', methods=['POST'])
+# @cross_origin()
+# @requires_auth('post:drinks')
+def create_movie():
+
+    body = request.get_json()
+
+    new_title = body.get('title', None)
+    new_release_date = body.get('release_date', None)
+    new_boxoffice = body.get('boxoffice', None)
+
+    try:
+        movie = Movie(
+                        title=new_title,
+                        release_date=new_release_date,
+                        boxoffice=new_boxoffice,
+                        )
+        movie.insert()
+
+        selection = Movie.query.filter(Movie.id == movie.id)
+
+        movie = [movie.format() for movie in selection]
+
+        return jsonify({
+            'success': True,
+            'movie': movie,
+        })
+
+    except BaseException:
+        abort(422)
+
+
+'''
+PATCH /movies
+'''
+
+
+@app.route('/movies/<int:movie_id>', methods=['PATCH'])
+def patch_movies(movie_id):
+
+    body = request.get_json()
+
+    update_title = body.get('title', None)
+    update_release_date = body.get('release_date', None)
+    update_boxoffice = body.get('boxoffice', None)
+
+    try:
+        movie = Movie.query.filter(Movie.id == movie_id) \
+                .one_or_none()
+
+        if movie is None:
+            abort(404)
+
+        movie.title = update_title
+        movie.release_date = update_release_date
+        movie.boxoffice = update_boxoffice
+        movie.update()
+
+        selection = Movie.query.filter(Movie.id == movie.id)
+
+        movie = [movie.format() for movie in selection]
+
+        return jsonify({
+            'success': True,
+            'movie': movie
+        })
+
+    except BaseException:
+        abort(400)
+
+
+'''
+DELETE /movies
+'''
+
+
+@app.route('/movies/<int:movie_id>', methods=['DELETE'])
+# @requires_auth('delete:drinks')
+def delete_movies(movie_id):
+
+    try:
+        movie = Movie.query.filter(Movie.id == movie_id) \
+                .one_or_none()
+
+        if movie is None:
+            abort(404)
+
+        movie.delete()
+
+        return jsonify({
+            'success': True,
+            'delete': movie.id
+        })
+
+    except BaseException:
+        abort(400)
+
+
+
+'''
+GET /actors
+'''
+
+
+@app.route('/actors')
+def retrieve_actors():
+
+    selection = Actor.query.order_by(Actor.id).all()
+
+    actors = [actor.format() for actor in selection]
+
+    return jsonify({
+        'success': True,
+        'actors': actors,
+    })
+
+
+'''
+POST /actors
+'''
+
+
+@app.route('/actors', methods=['POST'])
+# @cross_origin()
+# @requires_auth('post:drinks')
+def create_actor():
+
+    body = request.get_json()
+
+    new_name = body.get('name', None)
+    new_age = body.get('age', None)
+    new_gender = body.get('gender', None)
+   
+    try:
+        actor = Actor(
+                        name=new_name,
+                        age=new_age,
+                        gender=new_gender,
+                        )
+        actor.insert()
+
+        selection = Actor.query.filter(Actor.id == actor.id)
+
+        actor = [actor.format() for actor in selection]
+
+        return jsonify({
+            'success': True,
+            'actor': actor,
+        })
+
+    except BaseException:
+        abort(422)
+
+
+'''
+PATCH /actors
+'''
+
+
+@app.route('/actors/<int:actor_id>', methods=['PATCH'])
+def patch_actors(actor_id):
+
+    body = request.get_json()
+
+    update_name = body.get('name', None)
+    update_age = body.get('age', None)
+    update_gender = body.get('gender', None)
+
+    try:
+        actor = Actor.query.filter(Actor.id == actor_id) \
+                .one_or_none()
+
+        if actor is None:
+            abort(404)
+
+        actor.name = update_name
+        actor.age = update_age
+        actor.gender = update_gender
+        actor.update()
+
+        selection = Actor.query.filter(Actor.id == actor.id)
+
+        actor = [actor.format() for actor in selection]
+
+        return jsonify({
+            'success': True,
+            'actor': actor
+        })
+
+    except BaseException:
+        abort(400)
+
+
+'''
+DELETE /actors
+'''
+
+
+@app.route('/actors/<int:actor_id>', methods=['DELETE'])
+# @requires_auth('delete:drinks')
+def delete_actors(actor_id):
+
+    try:
+        actor = Actor.query.filter(Actor.id == actor_id) \
+                .one_or_none()
+
+        if actor is None:
+            abort(404)
+
+        actor.delete()
+
+        return jsonify({
+            'success': True,
+            'delete': actor.id
+        })
+
+    except BaseException:
+        abort(400)
+# ## Error Handling
+# '''
+# Example error handling for unprocessable entity
+# '''
+# @app.errorhandler(422)
+# def unprocessable(error):
+#     return jsonify({
+#                     "success": False, 
+#                     "error": 422,
+#                     "message": "unprocessable"
+#                     }), 422
+
+# '''
+# @TODO implement error handlers using the @app.errorhandler(error) decorator
+#     each error handler should return (with approprate messages):
+#              jsonify({
+#                     "success": False, 
+#                     "error": 404,
+#                     "message": "resource not found"
+#                     }), 404
+
+# '''
+# @app.errorhandler(404)
+# def not_found(error):
+#         return jsonify({
+#             "success": False,
+#             "error": 404,
+#             "message": "resource not found"
+#         }), 404
+
+# @app.errorhandler(400)
+# def bad_request(error):
+#     return jsonify({
+#         "success": False,
+#         "error": 400,
+#         "message": "bad request"
+#     }), 400
+
+# @app.errorhandler(405)
+# def not_allowed(error):
+#     return jsonify({
+#         "success": False,
+#         "error": 405,
+#         "message": "method not allowed"
+#     }), 405
+
+# @app.errorhandler(500)
+# def server_error(error):
+#     return jsonify({
+#         "success": False,
+#         "error": 500,
+#         "message": "server error"
+#     }), 500
+
+# '''
+# @TODO implement error handler for AuthError
+#     error handler should conform to general task above 
+# '''
+# @app.errorhandler(AuthError)
+# def auth_error(ex):
+#     return jsonify({
+#     "success": False,
+#     "error": ex.status_code,
+#     "message": ex.error['code']
+#     }),  ex.status_code
 
 if __name__ == '__main__':
-    APP.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
