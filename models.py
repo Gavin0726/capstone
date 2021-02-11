@@ -3,9 +3,11 @@ from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-database_name = "capstone"
-database_path = "postgres://{}@{}/{}" \
-  .format('gavin', 'localhost: 5432', database_name)
+# database_name = "capstone"
+# database_path = "postgres://{}@{}/{}" \
+#   .format('gavin', 'localhost: 5432', database_name)
+
+database_path = "postgres://eetdklukrvubcl:c87eee102709d8d204de0c870abc6a593eaf38b7dde50bc9a1140c30c0f1cbdb@ec2-52-205-3-3.compute-1.amazonaws.com:5432/dfecp8sb0e8ni5"
 
 db = SQLAlchemy()
 
@@ -23,6 +25,11 @@ def setup_db(app, database_path=database_path):
     db.create_all()
 
 
+def db_drop_and_create_all():
+    db.drop_all()
+    db.create_all()
+
+
 '''
 Assign
 
@@ -31,6 +38,8 @@ Assign
 
 class Assign(db.Model):
     __tablename__ = 'assign'
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'),
                          primary_key=True)
     actor_id = db.Column(db.Integer, db.ForeignKey('actor.id'),
@@ -55,6 +64,7 @@ class Assign(db.Model):
 
     def format(self):
         return {
+          'id': self.id,
           'movie_id': self.movie_id,
           'actor_id': self.actor_id,
         }

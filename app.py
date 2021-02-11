@@ -4,8 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import exc
 import json
-from models import setup_db, Assign, Movie, Actor
-# from .auth.auth import AuthError, requires_auth
+from models import setup_db, Assign, Movie, Actor, db_drop_and_create_all
+from auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
@@ -18,7 +18,7 @@ def create_app(test_config=None):
 
 
 app = create_app()
-
+db_drop_and_create_all()
 '''
 GET /movies
 '''
@@ -43,8 +43,7 @@ POST /movies
 
 
 @app.route('/movies', methods=['POST'])
-# @cross_origin()
-# @requires_auth('post:drinks')
+@requires_auth('add:movie')
 def create_movie():
 
     body = request.get_json()
@@ -140,7 +139,6 @@ def delete_movies(movie_id):
         abort(400)
 
 
-
 '''
 GET /actors
 '''
@@ -165,7 +163,6 @@ POST /actors
 
 
 @app.route('/actors', methods=['POST'])
-# @cross_origin()
 # @requires_auth('post:drinks')
 def create_actor():
 
@@ -174,7 +171,7 @@ def create_actor():
     new_name = body.get('name', None)
     new_age = body.get('age', None)
     new_gender = body.get('gender', None)
-   
+
     try:
         actor = Actor(
                         name=new_name,
@@ -260,71 +257,145 @@ def delete_actors(actor_id):
 
     except BaseException:
         abort(400)
-# ## Error Handling
-# '''
-# Example error handling for unprocessable entity
-# '''
-# @app.errorhandler(422)
-# def unprocessable(error):
-#     return jsonify({
-#                     "success": False, 
-#                     "error": 422,
-#                     "message": "unprocessable"
-#                     }), 422
 
-# '''
-# @TODO implement error handlers using the @app.errorhandler(error) decorator
-#     each error handler should return (with approprate messages):
-#              jsonify({
-#                     "success": False, 
-#                     "error": 404,
-#                     "message": "resource not found"
-#                     }), 404
 
-# '''
-# @app.errorhandler(404)
-# def not_found(error):
-#         return jsonify({
-#             "success": False,
-#             "error": 404,
-#             "message": "resource not found"
-#         }), 404
+'''
+GET /assigns
+'''
 
-# @app.errorhandler(400)
-# def bad_request(error):
-#     return jsonify({
-#         "success": False,
-#         "error": 400,
-#         "message": "bad request"
-#     }), 400
 
-# @app.errorhandler(405)
-# def not_allowed(error):
-#     return jsonify({
-#         "success": False,
-#         "error": 405,
-#         "message": "method not allowed"
-#     }), 405
+@app.route('/assigns')
+def retrieve_assigns():
 
-# @app.errorhandler(500)
-# def server_error(error):
-#     return jsonify({
-#         "success": False,
-#         "error": 500,
-#         "message": "server error"
-#     }), 500
+    selection = Assign.query.order_by(Assign.id).all()
 
-# '''
-# @TODO implement error handler for AuthError
-#     error handler should conform to general task above 
-# '''
+    assigns = [assign.format() for assign in selection]
+
+    return jsonify({
+        'success': True,
+        'assigns': assigns,
+    })
+
+
+'''
+POST /assigns
+'''
+
+
+@app.route('/assigns', methods=['POST'])
+# @requires_auth('post:drinks')
+def create_assign():
+
+    body = request.get_json()
+
+    new_movie_id = body.get('movie_id', None)
+    new_actor_id = body.get('actor_id', None)
+
+    try:
+        assign = Assign(
+                        movie_id=new_movie_id,
+                        actor_id=new_actor_id,
+                        )
+        assign.insert()
+
+        selection = Assign.query.filter(Assign.id == assign.id)
+
+        assign = [assign.format() for assign in selection]
+
+        return jsonify({
+            'success': True,
+            'assign': assign,
+        })
+
+    except BaseException:
+        abort(422)
+
+
+'''
+DELETE /assigns
+'''
+
+
+@app.route('/assigns/<int:assign_id>', methods=['DELETE'])
+# @requires_auth('delete:drinks')
+def delete_assigns(assign_id):
+
+    try:
+        assign = Assign.query.filter(Assign.id == assign_id) \
+                .one_or_none()
+
+        if assign is None:
+            abort(404)
+
+        assign.delete()
+
+        return jsonify({
+            'success': True,
+            'delete': assign.id
+        })
+
+    except BaseException:
+        abort(400)
+
+
+'''
+Error Handling
+'''
+
+
+@app.errorhandler(422)
+def unprocessable(error):
+    return jsonify({
+                    "success": False,
+                    "error": 422,
+                    "message": "unprocessable"
+                    }), 422
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({
+        "success": False,
+        "error": 400,
+        "message": "bad request"
+    }), 400
+
+
+@app.errorhandler(405)
+def not_allowed(error):
+    return jsonify({
+        "success": False,
+        "error": 405,
+        "message": "method not allowed"
+    }), 405
+
+
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({
+        "success": False,
+        "error": 500,
+        "message": "server error"
+    }), 500
+
+
 # @app.errorhandler(AuthError)
 # def auth_error(ex):
 #     return jsonify({
-#     "success": False,
-#     "error": ex.status_code,
-#     "message": ex.error['code']
-#     }),  ex.status_code
+#         "success": False,
+#         "error": ex.status_code,
+#         "message": ex.error['code']
+#         }),  ex.status_code
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
