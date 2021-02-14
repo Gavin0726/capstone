@@ -25,6 +25,7 @@ GET /movies
 
 
 @app.route('/movies')
+@requires_auth('view:movies')
 def retrieve_movies():
 
     selection = Movie.query.order_by(Movie.id).all()
@@ -79,6 +80,7 @@ PATCH /movies
 
 
 @app.route('/movies/<int:movie_id>', methods=['PATCH'])
+@requires_auth('modify:movie')
 def patch_movies(movie_id):
 
     body = request.get_json()
@@ -118,7 +120,7 @@ DELETE /movies
 
 
 @app.route('/movies/<int:movie_id>', methods=['DELETE'])
-# @requires_auth('delete:drinks')
+@requires_auth('delete:movie')
 def delete_movies(movie_id):
 
     try:
@@ -145,6 +147,7 @@ GET /actors
 
 
 @app.route('/actors')
+@requires_auth('view:actors')
 def retrieve_actors():
 
     selection = Actor.query.order_by(Actor.id).all()
@@ -163,7 +166,7 @@ POST /actors
 
 
 @app.route('/actors', methods=['POST'])
-# @requires_auth('post:drinks')
+@requires_auth('add:actor')
 def create_actor():
 
     body = request.get_json()
@@ -199,6 +202,7 @@ PATCH /actors
 
 
 @app.route('/actors/<int:actor_id>', methods=['PATCH'])
+@requires_auth('modify:actor')
 def patch_actors(actor_id):
 
     body = request.get_json()
@@ -238,7 +242,7 @@ DELETE /actors
 
 
 @app.route('/actors/<int:actor_id>', methods=['DELETE'])
-# @requires_auth('delete:drinks')
+@requires_auth('delete:actor')
 def delete_actors(actor_id):
 
     try:
@@ -265,6 +269,7 @@ GET /assigns
 
 
 @app.route('/assigns')
+@requires_auth('view:assign')
 def retrieve_assigns():
 
     selection = Assign.query.order_by(Assign.id).all()
@@ -283,7 +288,7 @@ POST /assigns
 
 
 @app.route('/assigns', methods=['POST'])
-# @requires_auth('post:drinks')
+@requires_auth('add:assign')
 def create_assign():
 
     body = request.get_json()
@@ -317,7 +322,7 @@ DELETE /assigns
 
 
 @app.route('/assigns/<int:assign_id>', methods=['DELETE'])
-# @requires_auth('delete:drinks')
+@requires_auth('delete:assign')
 def delete_assigns(assign_id):
 
     try:
