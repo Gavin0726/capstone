@@ -84,7 +84,6 @@ def check_permissions(permission, payload):
             'code': 'unauthorized',
             'description': 'Permission not found.'
         }, 403)
-    print("jing")
     return True
 
 

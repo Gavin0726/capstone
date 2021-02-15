@@ -393,13 +393,13 @@ def server_error(error):
     }), 500
 
 
-# @app.errorhandler(AuthError)
-# def auth_error(ex):
-#     return jsonify({
-#         "success": False,
-#         "error": ex.status_code,
-#         "message": ex.error['code']
-#         }),  ex.status_code
+@app.errorhandler(AuthError)
+def auth_error(ex):
+    return jsonify({
+        "success": False,
+        "error": ex.status_code,
+        "message": ex.error['code']
+        }),  ex.status_code
 
 
 if __name__ == '__main__':
