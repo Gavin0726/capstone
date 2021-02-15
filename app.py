@@ -26,7 +26,7 @@ GET /movies
 
 @app.route('/movies')
 @requires_auth('view:movies')
-def retrieve_movies():
+def retrieve_movies(payload):
 
     selection = Movie.query.order_by(Movie.id).all()
 
@@ -45,7 +45,7 @@ POST /movies
 
 @app.route('/movies', methods=['POST'])
 @requires_auth('add:movie')
-def create_movie():
+def create_movie(payload):
 
     body = request.get_json()
 
@@ -81,7 +81,7 @@ PATCH /movies
 
 @app.route('/movies/<int:movie_id>', methods=['PATCH'])
 @requires_auth('modify:movie')
-def patch_movies(movie_id):
+def patch_movies(payload, movie_id):
 
     body = request.get_json()
 
@@ -121,7 +121,7 @@ DELETE /movies
 
 @app.route('/movies/<int:movie_id>', methods=['DELETE'])
 @requires_auth('delete:movie')
-def delete_movies(movie_id):
+def delete_movies(payload, movie_id):
 
     try:
         movie = Movie.query.filter(Movie.id == movie_id) \
@@ -148,7 +148,7 @@ GET /actors
 
 @app.route('/actors')
 @requires_auth('view:actors')
-def retrieve_actors():
+def retrieve_actors(payload):
 
     selection = Actor.query.order_by(Actor.id).all()
 
@@ -167,7 +167,7 @@ POST /actors
 
 @app.route('/actors', methods=['POST'])
 @requires_auth('add:actor')
-def create_actor():
+def create_actor(payload):
 
     body = request.get_json()
 
@@ -203,7 +203,7 @@ PATCH /actors
 
 @app.route('/actors/<int:actor_id>', methods=['PATCH'])
 @requires_auth('modify:actor')
-def patch_actors(actor_id):
+def patch_actors(payload, actor_id):
 
     body = request.get_json()
 
@@ -243,7 +243,7 @@ DELETE /actors
 
 @app.route('/actors/<int:actor_id>', methods=['DELETE'])
 @requires_auth('delete:actor')
-def delete_actors(actor_id):
+def delete_actors(payload, actor_id):
 
     try:
         actor = Actor.query.filter(Actor.id == actor_id) \
@@ -270,7 +270,7 @@ GET /assigns
 
 @app.route('/assigns')
 @requires_auth('view:assign')
-def retrieve_assigns():
+def retrieve_assigns(payload):
 
     selection = Assign.query.order_by(Assign.id).all()
 
@@ -289,7 +289,7 @@ POST /assigns
 
 @app.route('/assigns', methods=['POST'])
 @requires_auth('add:assign')
-def create_assign():
+def create_assign(payload):
 
     body = request.get_json()
 
@@ -323,7 +323,7 @@ DELETE /assigns
 
 @app.route('/assigns/<int:assign_id>', methods=['DELETE'])
 @requires_auth('delete:assign')
-def delete_assigns(assign_id):
+def delete_assigns(payload, assign_id):
 
     try:
         assign = Assign.query.filter(Assign.id == assign_id) \
