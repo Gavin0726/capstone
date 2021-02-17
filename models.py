@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-# database_name = "capstone"
+# database_name = "capstone_test"
 # database_path = "postgres://{}@{}/{}" \
 #   .format('gavin', 'localhost: 5432', database_name)
 
