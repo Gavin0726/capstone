@@ -150,6 +150,7 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bad request')
 
+        
     '''
     test actors
     '''
